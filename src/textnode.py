@@ -125,3 +125,8 @@ def text_to_textnodes(text):
     nodes = split_nodes_link(nodes)
 
     return nodes
+
+def markdown_to_blocks(markdown):
+    components = markdown.split('\n\n')
+    components = list(filter(lambda item: not len(item) == 0, map(lambda component: component.strip('\n '), components)))
+    return components
