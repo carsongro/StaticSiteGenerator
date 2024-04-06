@@ -12,6 +12,13 @@ bold_delimiter = "**"
 italic_delimiter = "*"
 code_delimiter = "`"
 
+block_type_paragraph = "paragraph"
+block_type_heading = "heading"
+block_type_code = "code"
+block_type_quote = "quote"
+block_type_unordered_list = "unordered_list"
+block_type_ordered_list = "ordered_list"
+
 class TextNode:
     def __init__(self, text, text_type, url=None) -> None:
         self.text = text
@@ -130,3 +137,6 @@ def markdown_to_blocks(markdown):
     components = markdown.split('\n\n')
     components = list(filter(lambda item: not len(item) == 0, map(lambda component: component.strip('\n '), components)))
     return components
+
+def block_to_block_type(block):
+    

@@ -99,6 +99,26 @@ class TestTextNode(unittest.TestCase):
         ]
         result = markdown_to_blocks(markdown)
         self.assertEqual(expected, result)
+    
+    def test_text_block_to_block_type(self):
+        blocks = [
+            "##### Heading",
+            "```code block```",
+            ">quote\n>quote",
+            "* unordered list\n- unorderedlist",
+            "1. ordered list\n2. ordered list\n3. ordered list",
+            "########## normal paragraph"
+        ]
+        results = list(map(lambda block: block_to_block_type(block), blocks))
+        expected = [
+            block_type_heading,
+            block_type_code,
+            block_type_quote,
+            block_type_unordered_list,
+            block_type_ordered_list,
+            block_type_paragraph
+        ]
+        self.assertEqual(results, expected)
 
 
 
