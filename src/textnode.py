@@ -1,4 +1,5 @@
 from htmlnode import LeafNode
+import re
 
 text_type_text = "text"
 text_type_bold = "bold"
@@ -53,3 +54,58 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
 
     return new_nodes
 
+
+def extract_markdown_images(text):
+    return re.findall(r"!\[(.*?)\]\((.*?)\)", text)
+
+def extract_markdown_links(text):
+    return re.findall(r"\[(.*?)\]\((.*?)\)", text)
+
+def split_nodes_image(old_nodes):
+    new_nodes = []
+
+    def getNodeList(node):
+        images = extract_markdown_images(node.text)
+
+        if len(images) == 0:
+            node = [TextNode(node.text, text_type_text)] if not (node.text == "" or node.text == "\n") else []
+            return node
+
+        components = node.text.split(f"![{images[0][0]}]({images[0][1]})", 1)
+        before, after = components[0], components[1]
+
+        nodes = []
+        nodes.extend(getNodeList(TextNode(before, text_type_text)))
+        nodes.append(TextNode(images[0][0], text_type_image, images[0][1]))
+        nodes.extend(getNodeList(TextNode(after, text_type_text)))
+            
+        return nodes
+    
+    for node in old_nodes:
+        new_nodes.extend(getNodeList(node))
+
+    return new_nodes
+
+def split_nodes_link(old_nodes):
+    new_nodes = []
+
+    def getNodeList(node):
+        links = extract_markdown_links(node.text)
+        if len(links) == 0:
+            node = [TextNode(node.text, text_type_text)] if not (node.text == "" or node.text == "\n") else []
+            return node
+
+        components = node.text.split(f"[{links[0][0]}]({links[0][1]})", 1)
+        before, after = components[0], components[1]
+
+        nodes = []
+        nodes.extend(getNodeList(TextNode(before, text_type_text)))
+        nodes.append(TextNode(links[0][0], text_type_link, links[0][1]))
+        nodes.extend(getNodeList(TextNode(after, text_type_text)))
+            
+        return nodes
+    
+    for node in old_nodes:
+        new_nodes.extend(getNodeList(node))
+
+    return new_nodes
