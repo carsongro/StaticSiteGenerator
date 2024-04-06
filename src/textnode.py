@@ -139,4 +139,22 @@ def markdown_to_blocks(markdown):
     return components
 
 def block_to_block_type(block):
-    
+    def isOrderedList(block):
+        lines = block.split("\n")
+        for idx, line in enumerate(lines):
+            if not line.startswith(f"{idx + 1}."):
+                return False
+        return True
+
+    if re.split(r"^#{1,6} ", block)[0] == "":
+        return block_type_heading
+    elif block.startswith("```") and block.endswith("```"):
+        return block_type_code
+    elif len(list(filter(lambda line: not line.startswith(">"), block.split("\n")))) == 0:
+        return block_type_quote
+    elif len(list(filter(lambda line: not (line.startswith("*") or line.startswith("-")), block.split("\n")))) == 0:
+        return block_type_unordered_list
+    elif isOrderedList(block):
+        return block_type_ordered_list
+
+    return block_type_paragraph

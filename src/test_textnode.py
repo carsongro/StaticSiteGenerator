@@ -102,12 +102,13 @@ class TestTextNode(unittest.TestCase):
     
     def test_text_block_to_block_type(self):
         blocks = [
-            "##### Heading",
+            "###### Heading",
             "```code block```",
             ">quote\n>quote",
             "* unordered list\n- unorderedlist",
             "1. ordered list\n2. ordered list\n3. ordered list",
-            "########## normal paragraph"
+            "########## normal paragraph",
+            "> not q quote\n not a quote\n > not a quote"
         ]
         results = list(map(lambda block: block_to_block_type(block), blocks))
         expected = [
@@ -116,6 +117,7 @@ class TestTextNode(unittest.TestCase):
             block_type_quote,
             block_type_unordered_list,
             block_type_ordered_list,
+            block_type_paragraph,
             block_type_paragraph
         ]
         self.assertEqual(results, expected)
