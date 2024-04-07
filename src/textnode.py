@@ -13,13 +13,6 @@ bold_delimiter = "**"
 italic_delimiter = "*"
 code_delimiter = "`"
 
-block_type_paragraph = "paragraph"
-block_type_heading = "heading"
-block_type_code = "code"
-block_type_quote = "quote"
-block_type_unordered_list = "unordered_list"
-block_type_ordered_list = "ordered_list"
-
 class TextNode:
     def __init__(self, text, text_type, url=None) -> None:
         self.text = text
@@ -133,66 +126,3 @@ def text_to_textnodes(text):
     nodes = split_nodes_link(nodes)
 
     return nodes
-
-def markdown_to_blocks(markdown):
-    components = markdown.split('\n\n')
-    components = list(filter(lambda item: not len(item) == 0, map(lambda component: component.strip('\n '), components)))
-    return components
-
-def block_to_block_type(block):
-    def isOrderedList(block):
-        lines = block.split("\n")
-        for idx, line in enumerate(lines):
-            if not line.startswith(f"{idx + 1}."):
-                return False
-        return True
-
-    if re.split(r"^#{1,6} ", block)[0] == "":
-        return block_type_heading
-    elif block.startswith("```") and block.endswith("```"):
-        return block_type_code
-    elif len(list(filter(lambda line: not line.startswith(">"), block.split("\n")))) == 0:
-        return block_type_quote
-    elif len(list(filter(lambda line: not (line.startswith("*") or line.startswith("-")), block.split("\n")))) == 0:
-        return block_type_unordered_list
-    elif isOrderedList(block):
-        return block_type_ordered_list
-
-    return block_type_paragraph
-
-def heading_block_to_htmlnode(block):
-    components = block.split()
-    h_num = len(components[0])
-    return LeafNode(f"h{h_num}", re.split(r"^#{1,6} ", block)[1])
-
-def code_block_to_htmlnode(block):
-    return ParentNode("pre", [LeafNode("code", block.strip('`'))])
-
-def quote_block_to_htmlnode(block):
-    leafs = []
-    lines = block.split('>')
-    for line in lines:
-        if line == "":
-            continue
-        leafs.append(LeafNode("p", line))
-    return ParentNode("blockquote", leafs)
-
-def unordered_list_block_to_htmlnode(block):
-    leafs = []
-    lines = block.split('\n')
-    for line in lines:
-        leafs.append(LeafNode("li", line[1:].strip("\n")))
-    return ParentNode("ul", leafs)
-
-def ordered_list_block_to_htmlnode(block):
-    leafs = []
-    lines = block.split('\n')
-    for line in lines:
-        leafs.append(LeafNode("li", line[2:].strip("\n")))
-    return ParentNode("ol", leafs)
-
-def paragraph_block_to_htmlnode(block):
-    return LeafNode("p", block)
-
-def markdown_to_html_node(markdown):
-    pass
