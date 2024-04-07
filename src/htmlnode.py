@@ -30,8 +30,8 @@ class LeafNode(HTMLNode):
             raise ValueError("A value must be provided to use this method.")
         if not self.tag:
             return self.value
-
-        return f"<{self.tag}" + f"{None if not self.props else super().props_to_html()}>" + f"{self.value}" + f"</{self.tag}>"
+        # "" may need to be None check on this is weird things start happening
+        return f"<{self.tag}" + f"{"" if not self.props else super().props_to_html()}>" + f"{self.value}" + f"</{self.tag}>"
     
 class ParentNode(HTMLNode):
     def __init__(self, tag=None, children=[], props=None) -> None:

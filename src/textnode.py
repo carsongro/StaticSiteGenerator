@@ -49,7 +49,8 @@ def split_nodes_delimiter(old_nodes, delimiter, text_type):
         if not node.text_type == text_type_text:
             new_nodes.append(node)
             continue
-        if not node.text.count(delimiter) % 2 == 0:
+        if not node.text.count(delimiter) % 2 == 0 and not (node.text.startswith(delimiter) and node.text.endswith(delimiter)):
+            print(node)
             raise Exception("The delimiter must be closed.")
 
         components = node.text.split(delimiter)
@@ -135,7 +136,15 @@ block_type_unordered_list = "unordered_list"
 block_type_ordered_list = "ordered_list"
 
 def markdown_to_blocks(markdown):
-    components = markdown.split('\n\n')
+    components = []
+    code_components = markdown.split("```")
+
+    for idx, component in enumerate(code_components):
+        if idx % 2 == 1: # in a code block
+            components.append("```" + component + "```")
+        else:
+            components.extend(component.split("\n\n"))
+    # components = markdown.split("\n\n")
     components = list(filter(lambda item: not len(item) == 0, map(lambda component: component.strip('\n '), components)))
     return components
 
@@ -149,7 +158,7 @@ def block_to_block_type(block):
 
     if re.split(r"^#{1,6} ", block)[0] == "":
         return block_type_heading
-    elif block.startswith("```") and block.endswith("```"):
+    elif block.startswith("`") and block.endswith("`"):
         return block_type_code
     elif len(list(filter(lambda line: not line.startswith(">"), block.split("\n")))) == 0:
         return block_type_quote
