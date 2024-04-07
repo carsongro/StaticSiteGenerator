@@ -27,6 +27,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - name: Setup Pages
+        id: pages
+        uses: actions/configure-pages@v5
       - name: Generate Files
         run: |
           chmod +x ./main.sh
@@ -35,25 +38,22 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           # Upload public
-          name: public
-          path: 'public'
+          path: './public'
   deploy:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    needs: build
     steps:
       - name: Download public directory from build
         uses: actions/download-artifact@v4
         with:
-          name: public
-          path: 'public'
-      - name: Setup Pages
-        uses: actions/configure-pages@v5
+          path: './public'
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: 'public'
+          path: './public'
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
