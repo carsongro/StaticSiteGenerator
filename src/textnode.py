@@ -165,7 +165,7 @@ def heading_block_to_htmlnode(block):
     h_num = len(components[0])
 
     parents = []
-    lines = re.split(r"^#{1,6}", block)
+    lines = re.split(r"^#{1,6} ", block)
     for line in list(filter(lambda line: not len(line) == 0, lines)):
         parents.append(ParentNode("p", list(map(lambda node: text_node_to_html_node(node), text_to_textnodes(line)))))
     return ParentNode(f"h{h_num}", parents)

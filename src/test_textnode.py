@@ -1,6 +1,7 @@
 import unittest
 
 from textnode import *
+from htmlnode import HTMLNode
 
 class TestTextNode(unittest.TestCase):
     def test_eq(self):
@@ -125,7 +126,7 @@ class TestTextNode(unittest.TestCase):
     def test_heading_block_to_htmlnode(self):
         block = "###### Heading"
         result = heading_block_to_htmlnode(block)
-        expected = LeafNode("h6", "Heading")
+        expected = HTMLNode("h6", None, [HTMLNode("p", None, [HTMLNode(None, "Heading", None, None)], None)], None) 
         self.assertEqual(expected, result)
 
     def test_code_block_to_htmlnode(self):
@@ -137,39 +138,40 @@ class TestTextNode(unittest.TestCase):
     def test_quote_block_to_htmlnode(self):
         block = ">quote\n>quote"
         result = quote_block_to_htmlnode(block)
-        expected = ParentNode("blockquote", [LeafNode("p", "quote\n"), LeafNode("p", "quote")])
+        expected = HTMLNode("blockquote", None, [HTMLNode("p", None, [HTMLNode(None, "quote\n", None, None)], None), HTMLNode("p", None, [HTMLNode(None, "quote", None, None)], None)], None)
         self.assertEqual(expected, result)
 
     def test_unordered_list_block_to_htmlnode(self):
         block = "* unordered list\n- unorderedlist"
         result = unordered_list_block_to_htmlnode(block)
-        expected = ParentNode("ul", [LeafNode("li", " unordered list"), LeafNode("li", " unorderedlist")])
+        expected = HTMLNode("ul", None, [HTMLNode("li", None, [HTMLNode(None, "unordered list\n", None, None)], None), HTMLNode("li", None, [HTMLNode(None, " unorderedlist", None, None)], None)], None)
         self.assertEqual(expected, result)
 
     def test_ordered_list_block_to_htmlnode(self):
         block = "1. ordered list\n2. ordered list\n3. ordered list"
         result = ordered_list_block_to_htmlnode(block)
-        expected = ParentNode("ol", [LeafNode("li", " ordered list"), LeafNode("li", " ordered list"), LeafNode("li", " ordered list")])
+        expected = HTMLNode("ol", None, [HTMLNode("li", None, [HTMLNode(None, " ordered list\n", None, None)], None), HTMLNode("li", None, [HTMLNode(None, " ordered list\n", None, None)], None), HTMLNode("li", None, [HTMLNode(None, " ordered list", None, None)], None)], None)
         self.assertEqual(expected, result)
 
     def test_paragraph_block_to_htmlnode(self):
         block = "########## normal paragraph"
         result = paragraph_block_to_htmlnode(block)
-        expected = LeafNode("p", block)
+        expected = HTMLNode("p", None, [HTMLNode(None, "########## normal paragraph", None, None)], None)
         self.assertEqual(expected, result)
     
     def test_markdown_to_html_node(self):
         markdown = "###### Heading\n\n```code block```\n\n>quote\n>quote\n\n* unordered list\n- unorderedlist\n\n1. ordered list\n2. ordered list\n3. ordered list\n\n########## normal paragraph\n\n> not q quote\n not a quote\n > not a quote"
         result = markdown_to_html_node(markdown)
         expected = ParentNode("div", [
-            LeafNode("h6", "Heading"),
-            ParentNode("pre", [LeafNode("code", "code block")]),
-            ParentNode("blockquote", [LeafNode("p", "quote\n"), LeafNode("p", "quote")]),
-            ParentNode("ul", [LeafNode("li", " unordered list"), LeafNode("li", " unorderedlist")]),
-            ParentNode("ol", [LeafNode("li", " ordered list"), LeafNode("li", " ordered list"), LeafNode("li", " ordered list")]),
-            LeafNode("p", "########## normal paragraph"),
-            LeafNode("p", "> not q quote\n not a quote\n > not a quote")
-        ])
+                HTMLNode("h6", None, [HTMLNode("p", None, [HTMLNode(None, "Heading", None, None)], None)], None),
+                ParentNode("pre", [LeafNode("code", "code block")]),
+                HTMLNode("blockquote", None, [HTMLNode("p", None, [HTMLNode(None, "quote\n", None, None)], None), HTMLNode("p", None, [HTMLNode(None, "quote", None, None)], None)], None),
+                HTMLNode("ul", None, [HTMLNode("li", None, [HTMLNode(None, "unordered list\n", None, None)], None), HTMLNode("li", None, [HTMLNode(None, " unorderedlist", None, None)], None)], None),
+                HTMLNode("ol", None, [HTMLNode("li", None, [HTMLNode(None, " ordered list\n", None, None)], None), HTMLNode("li", None, [HTMLNode(None, " ordered list\n", None, None)], None), HTMLNode("li", None, [HTMLNode(None, " ordered list", None, None)], None)], None),
+                HTMLNode("p", None, [HTMLNode(None, "########## normal paragraph", None, None)], None),
+                HTMLNode("p", None, [HTMLNode(None, "> not q quote\n not a quote\n > not a quote", None, None)], None)
+            ]
+        )
         self.assertEqual(expected, result)
 
 
