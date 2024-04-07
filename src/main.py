@@ -5,7 +5,7 @@ import os
 
 def main():
     copy_contents("static", "public")
-    generate_page("content/index.md", "template.html", "public/index.html")
+    generate_pages_recursive("content", "template.html", "public")
 
 def copy_contents(from_directory, to_directory):
     # remove contents from old directory    
@@ -59,6 +59,28 @@ def generate_page(from_path, template_path, dest_path):
     n = open(dest_path, "x")
     n.write(template_contents)
     n.close()
+
+def generate_pages_recursive(dir_path_content, template_path, dest_dir_path):
+    content_directory = os.listdir(dir_path_content)
+
+    def md_to_html(from_path):
+        components = from_path.split("/")
+        components[-1] = components[-1].replace(".md", ".html")
+        return "/".join(components)
+
+    def write(from_directory, to_directory):
+        paths = os.listdir(from_directory)
+        for path in paths:
+            isFile = os.path.isfile(os.path.join(from_directory, path))
+            src, dst = os.path.join(from_directory, path), md_to_html(os.path.join(to_directory, path))
+            if isFile:
+                print(f"Copying: {src} to {dst}")
+                generate_page(src, template_path, dst)
+            else:
+                os.mkdir(dst)
+                write(f"{src}", f"{dst}")
+
+    write(dir_path_content, dest_dir_path)
 
 
 if __name__ == '__main__':
