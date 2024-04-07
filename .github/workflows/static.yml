@@ -42,10 +42,8 @@ jobs:
         with:
           # Upload entire repository
           path: '.'
-      - name: Download public result
-        uses: actions/download-artifact@v4
-        with:
-          name: 'public'
+      - name: list files
+        run: ls
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
