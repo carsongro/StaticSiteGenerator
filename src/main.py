@@ -1,10 +1,11 @@
-from textnode import TextNode
-from htmlnode import markdown_to_blocks, block_type_heading, block_to_block_type
+from htmlnode import HTMLNode
+from textnode import markdown_to_blocks, markdown_to_html_node, block_to_block_type, block_type_heading
 import shutil
 import os
 
 def main():
     copy_contents("static", "public")
+    generate_page("content/index.md", "template.html", "public/index.html")
 
 def copy_contents(from_directory, to_directory):
     # remove contents from old directory    
@@ -35,7 +36,30 @@ def extract_title(markdown):
 
 
 def generate_page(from_path, template_path, dest_path):
-    pass
+    print(f"Generating page from {from_path} to {dest_path} using {template_path}")
+
+    f = open(from_path)
+    file_contents = f.read()
+    f.close()
+
+    t = open(template_path)
+    template_contents = t.read()
+    t.close()
+
+    node = markdown_to_html_node(file_contents)
+    html = node.to_html()
+    title = extract_title(file_contents)
+    template_contents = template_contents.replace("{{ Title }}", title)
+    template_contents = template_contents.replace("{{ Content }}", html)
+
+    dir = os.path.dirname(dest_path)
+    if not os.path.exists(dir):
+        os.makedirs(dir)
+    
+    n = open(dest_path, "x")
+    n.write(template_contents)
+    n.close()
+
 
 if __name__ == '__main__':
     main()

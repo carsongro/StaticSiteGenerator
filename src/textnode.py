@@ -37,9 +37,9 @@ def text_node_to_html_node(text_node):
     elif type == text_type_code:
         return LeafNode("code", text_node.text)
     elif type == text_type_link:
-        return LeafNode("a", text_node.text)
+        return LeafNode("a", text_node.text, {"href": text_node.url})
     elif type == text_type_image:
-        return LeafNode("b", "", {"src": text_node.url, "alt": text_node.text})
+        return LeafNode("img", " ", {"src": text_node.url, "alt": text_node.text})
     raise Exception(f"Could not find text type {type}")
 
 def split_nodes_delimiter(old_nodes, delimiter, text_type):
@@ -124,5 +124,98 @@ def text_to_textnodes(text):
     nodes = split_nodes_delimiter(nodes, code_delimiter, text_type_code)
     nodes = split_nodes_image(nodes)
     nodes = split_nodes_link(nodes)
-
+    
     return nodes
+
+block_type_paragraph = "paragraph"
+block_type_heading = "heading"
+block_type_code = "code"
+block_type_quote = "quote"
+block_type_unordered_list = "unordered_list"
+block_type_ordered_list = "ordered_list"
+
+def markdown_to_blocks(markdown):
+    components = markdown.split('\n\n')
+    components = list(filter(lambda item: not len(item) == 0, map(lambda component: component.strip('\n '), components)))
+    return components
+
+def block_to_block_type(block):
+    def isOrderedList(block):
+        lines = block.split("\n")
+        for idx, line in enumerate(lines):
+            if not line.startswith(f"{idx + 1}."):
+                return False
+        return True
+
+    if re.split(r"^#{1,6} ", block)[0] == "":
+        return block_type_heading
+    elif block.startswith("```") and block.endswith("```"):
+        return block_type_code
+    elif len(list(filter(lambda line: not line.startswith(">"), block.split("\n")))) == 0:
+        return block_type_quote
+    elif len(list(filter(lambda line: not (line.startswith("*") or line.startswith("-")), block.split("\n")))) == 0:
+        return block_type_unordered_list
+    elif isOrderedList(block):
+        return block_type_ordered_list
+
+    return block_type_paragraph
+
+def heading_block_to_htmlnode(block):
+    components = block.split()
+    h_num = len(components[0])
+
+    parents = []
+    lines = re.split(r"^#{1,6}", block)
+    for line in list(filter(lambda line: not len(line) == 0, lines)):
+        parents.append(ParentNode("p", list(map(lambda node: text_node_to_html_node(node), text_to_textnodes(line)))))
+    return ParentNode(f"h{h_num}", parents)
+
+def code_block_to_htmlnode(block):
+    return ParentNode("pre", [LeafNode("code", block.strip('`'))])
+
+def quote_block_to_htmlnode(block):
+    parents = []
+    lines = re.split(r">", block)
+    for line in list(filter(lambda line: not len(line) == 0, lines)):
+        parents.append(ParentNode("p", list(map(lambda node: text_node_to_html_node(node), text_to_textnodes(line)))))
+    return ParentNode("blockquote", parents)
+
+def unordered_list_block_to_htmlnode(block):
+    parents = []
+    lines = re.split(r"\* |\-", block)
+    for line in list(filter(lambda line: not len(line) == 0, lines)):
+        parents.append(ParentNode("li", list(map(lambda node: text_node_to_html_node(node), text_to_textnodes(line)))))
+    return ParentNode("ul", parents)
+
+def ordered_list_block_to_htmlnode(block):
+    parents = []
+    lines = re.split(r"\d.", block)
+    for line in list(filter(lambda line: not len(line) == 0, lines)):
+        parents.append(ParentNode("li", list(map(lambda node: text_node_to_html_node(node), text_to_textnodes(line)))))
+    return ParentNode("ol", parents)
+
+def paragraph_block_to_htmlnode(block):
+    nodes = text_to_textnodes(block)
+
+    children = []
+    for node in nodes:
+        children.append(text_node_to_html_node(node))
+
+    return ParentNode("p", children)
+
+def markdown_to_html_node(markdown):
+    def getHTMLNode(block):
+        type = block_to_block_type(block)
+        if type == block_type_heading:
+            return heading_block_to_htmlnode(block)
+        elif type == block_type_code:
+            return code_block_to_htmlnode(block)
+        elif type == block_type_quote:
+            return quote_block_to_htmlnode(block)
+        elif type == block_type_unordered_list:
+            return unordered_list_block_to_htmlnode(block)
+        elif type == block_type_ordered_list:
+            return ordered_list_block_to_htmlnode(block)
+        return paragraph_block_to_htmlnode(block)
+    
+    return ParentNode("div", list(map(getHTMLNode, markdown_to_blocks(markdown))))
