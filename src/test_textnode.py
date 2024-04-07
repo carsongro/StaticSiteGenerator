@@ -122,6 +122,41 @@ class TestTextNode(unittest.TestCase):
         ]
         self.assertEqual(results, expected)
 
+    def test_heading_block_to_htmlnode(self):
+        block = "###### Heading"
+        result = heading_block_to_htmlnode(block)
+        expected = LeafNode("h6", "Heading")
+        self.assertEqual(expected, result)
+
+    def test_code_block_to_htmlnode(self):
+        block = "```code block```"
+        result = code_block_to_htmlnode(block)
+        expected = ParentNode("pre", [LeafNode("code", "code block")])
+        self.assertEqual(result, expected)
+
+    def test_quote_block_to_htmlnode(self):
+        block = ">quote\n>quote"
+        result = quote_block_to_htmlnode(block)
+        expected = ParentNode("blockquote", [LeafNode("p", "quote\n"), LeafNode("p", "quote")])
+        self.assertEqual(expected, result)
+
+    def test_unordered_list_block_to_htmlnode(self):
+        block = "* unordered list\n- unorderedlist"
+        result = unordered_list_block_to_htmlnode(block)
+        expected = ParentNode("ul", [LeafNode("li", " unordered list"), LeafNode("li", " unorderedlist")])
+        self.assertEqual(expected, result)
+
+    def test_ordered_list_block_to_htmlnode(self):
+        block = "1. ordered list\n2. ordered list\n3. ordered list"
+        result = ordered_list_block_to_htmlnode(block)
+        expected = ParentNode("ol", [LeafNode("li", " ordered list"), LeafNode("li", " ordered list"), LeafNode("li", " ordered list")])
+        self.assertEqual(expected, result)
+
+    def test_paragraph_block_to_htmlnode(self):
+        block = "########## normal paragraph"
+        result = paragraph_block_to_htmlnode(block)
+        expected = LeafNode("p", block)
+        self.assertEqual(expected, result)
 
 
 if __name__ == "__main__":

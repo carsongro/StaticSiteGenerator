@@ -1,4 +1,5 @@
 from htmlnode import LeafNode
+from htmlnode import ParentNode
 import re
 
 text_type_text = "text"
@@ -158,3 +159,40 @@ def block_to_block_type(block):
         return block_type_ordered_list
 
     return block_type_paragraph
+
+def heading_block_to_htmlnode(block):
+    components = block.split()
+    h_num = len(components[0])
+    return LeafNode(f"h{h_num}", re.split(r"^#{1,6} ", block)[1])
+
+def code_block_to_htmlnode(block):
+    return ParentNode("pre", [LeafNode("code", block.strip('`'))])
+
+def quote_block_to_htmlnode(block):
+    leafs = []
+    lines = block.split('>')
+    for line in lines:
+        if line == "":
+            continue
+        leafs.append(LeafNode("p", line))
+    return ParentNode("blockquote", leafs)
+
+def unordered_list_block_to_htmlnode(block):
+    leafs = []
+    lines = block.split('\n')
+    for line in lines:
+        leafs.append(LeafNode("li", line[1:].strip("\n")))
+    return ParentNode("ul", leafs)
+
+def ordered_list_block_to_htmlnode(block):
+    leafs = []
+    lines = block.split('\n')
+    for line in lines:
+        leafs.append(LeafNode("li", line[2:].strip("\n")))
+    return ParentNode("ol", leafs)
+
+def paragraph_block_to_htmlnode(block):
+    return LeafNode("p", block)
+
+def markdown_to_html_node(markdown):
+    pass
