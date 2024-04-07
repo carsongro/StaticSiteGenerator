@@ -32,7 +32,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Generate files
-        uses: ./main.sh
+        uses: sh ./main.sh
       - name: Setup Pages
         uses: actions/configure-pages@v5
       - name: Upload artifact
