@@ -1,4 +1,5 @@
 from textnode import TextNode
+from htmlnode import markdown_to_blocks, block_type_heading, block_to_block_type
 import shutil
 import os
 
@@ -24,8 +25,17 @@ def copy_contents(from_directory, to_directory):
     
     copy(from_directory, to_directory)
     
+def extract_title(markdown):
+    blocks = markdown_to_blocks(markdown)
+    for block in blocks:
+        if block_to_block_type(block) == block_type_heading and block.startswith("# "):
+            return block.removeprefix("# ")
+
+    raise Exception("There must be a h1 header")
 
 
+def generate_page(from_path, template_path, dest_path):
+    pass
 
 if __name__ == '__main__':
     main()
